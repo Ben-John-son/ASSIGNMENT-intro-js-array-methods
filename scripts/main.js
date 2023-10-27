@@ -18,17 +18,32 @@ const renderCards = (array) => {
 // .findIndex() & (.includes() - string method)
 const toggleCart = (event) => {
   if (event.target.id.includes("fav-btn")) {
-    console.log("Clicked Fav btn");
+    const [, id] = event.target.id.split("--");
+
+    const index = referenceList.findIndex((taco) => taco.id === Number(id));
+
+    referenceList[index].inCart = !referenceList[index].inCart;
+    cartTotal();
+    renderCards(referenceList);
   }
 };
 
 // SEARCH
 // .filter()
+// event is a taco
+// when eventListener is added to document, you have access to this event
+// event is an object, can be seen on dev tools if console.log(event)
 const search = (event) => {
   const eventLC = event.target.value.toLowerCase();
-  eventLC.filter(event.title, event.author, event.type, event.description);
-  renderCards(eventLC);
-  console.log(eventLC);
+  const searchResult = referenceList.filter(
+    (taco) =>
+      taco.title.toLocaleLowerCase().includes(eventLC) ||
+      taco.author.toLocaleLowerCase().includes(eventLC) ||
+      taco.type.toLocaleLowerCase().includes(eventLC) ||
+      taco.description.toLowerCase().includes(eventLC)
+  );
+
+  renderCards(searchResult);
 };
 
 // BUTTON FILTER
@@ -74,8 +89,17 @@ const buttonFilter = (event) => {
 // CALCULATE CART TOTAL
 // .reduce() & .some()
 const cartTotal = () => {
-  const total = 0;
+  const cart = referenceList.filter((taco) => taco.inCart);
+  const total = cart.reduce((a, b) => a + b.price, 0);
+  const free = cart.some((taco) => taco.price <= 0);
+
   document.querySelector("#cartTotal").innerHTML = total.toFixed(2);
+  if (free) {
+    document.querySelectorAll("#includes-free").innerHTML =
+      "INCLUDES FREE ITEMS";
+  } else {
+    document.querySelectorAll("#includes-free").innerHTML = "";
+  }
 };
 
 // RESHAPE DATA TO RENDER TO DOM
